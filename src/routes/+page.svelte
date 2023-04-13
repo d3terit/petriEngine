@@ -10,10 +10,9 @@
 		 */
 		let myDiagram;
 		function init() {
-			// Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
-			// For details, see https://gojs.net/latest/intro/buildingObjects.html
 			const $ = go.GraphObject.make; // for conciseness in defining templates
 
+			let count = 0;
 			// some constants that will be reused within templates
 			var roundedRectangleParams = {
 				parameter1: 2, // set the rounded corner
@@ -26,30 +25,30 @@
 				go.Diagram,
 				"myDiagramDiv", // must name or refer to the DIV HTML element
 				{
-					"animationManager.initialAnimationStyle":
-						go.AnimationManager.None,
-					InitialAnimationStarting: (
-						/** @type {{ subject: { defaultAnimation: any; }; diagram: any; }} */ e
-					) => {
-						var animation = e.subject.defaultAnimation;
-						animation.easing = go.Animation.EaseOutExpo;
-						animation.duration = 900;
-						animation.add(e.diagram, "scale", 0.1, 1);
-						animation.add(e.diagram, "opacity", 0, 1);
-					},
+				"animationManager.initialAnimationStyle":
+					go.AnimationManager.None,
+				InitialAnimationStarting: (
+					/** @type {{ subject: { defaultAnimation: any; }; diagram: any; }} */ e
+				) => {
+					var animation = e.subject.defaultAnimation;
+					animation.easing = go.Animation.EaseOutExpo;
+					animation.duration = 900;
+					animation.add(e.diagram, "scale", 0.1, 1);
+					animation.add(e.diagram, "opacity", 0, 1);
+				},
 
-					// have mouse wheel events zoom in and out instead of scroll up and down
-					"toolManager.mouseWheelBehavior": go.ToolManager.WheelZoom,
-					// support double-click in background creating a new node
-					"clickCreatingTool.archetypeNodeData": { text: "p_" },
-					// enable undo & redo
-					"undoManager.isEnabled": true,
-					positionComputation: (
-						/** @type {any} */ diagram,
-						/** @type {{ x: number; y: number; }} */ pt
-					) => {
-						return new go.Point(Math.floor(pt.x), Math.floor(pt.y));
-					},
+				// have mouse wheel events zoom in and out instead of scroll up and down
+				"toolManager.mouseWheelBehavior": go.ToolManager.WheelZoom,
+				// support double-click in background creating a new node
+				"clickCreatingTool.archetypeNodeData": { text: "p"+count++ },
+				// enable undo & redo
+				"undoManager.isEnabled": true,
+				positionComputation: (
+					/** @type {any} */ diagram,
+					/** @type {{ x: number; y: number; }} */ pt
+				) => {
+					return new go.Point(Math.floor(pt.x), Math.floor(pt.y));
+				},
 				}
 			);
 
@@ -60,57 +59,91 @@
 				if (button) button.disabled = !myDiagram.isModified;
 				var idx = document.title.indexOf("*");
 				if (myDiagram.isModified) {
-					if (idx < 0) document.title += "*";
+				if (idx < 0) document.title += "*";
 				} else {
-					if (idx >= 0) document.title = document.title.slice(0, idx);
+				if (idx >= 0) document.title = document.title.slice(0, idx);
 				}
 			});
+
+			// Plantilla para nodos tipo "lugar" (círculos)
+			myDiagram.nodeTemplateMap.add("lugar",
+				$(go.Node, "Spot",
+				{ locationSpot: go.Spot.Center },
+				$(go.Shape, "Circle",
+					{
+					fill: "white",
+					stroke: "black",
+					strokeWidth: 2,
+					width: 40,
+					height: 40
+					}),
+				$(go.TextBlock,
+					{
+					font: "bold small-caps 11pt helvetica, bold arial, sans-serif",
+					stroke: "black",
+					textAlign: "center",
+					margin: 4,
+					maxSize: new go.Size(80, NaN),
+					wrap: go.TextBlock.WrapFit
+					},
+					new go.Binding("text").makeTwoWay())
+				)
+			);
+
+			myDiagram.nodeTemplateMap.add("transicion",
+				$(go.Node, "Spot",
+					{ locationSpot: go.Spot.Center, rotateObjectName: "SHAPE" },
+					$(go.Shape, "Rectangle",
+					{
+						fill: "white",
+						stroke: "black",
+						strokeWidth: 2,
+						width: 60,
+						height: 40,
+						name: "SHAPE"
+					}),
+					$(go.TextBlock,
+					{
+						font: "bold small-caps 11pt helvetica, bold arial, sans-serif",
+						stroke: "black",
+						textAlign: "center",
+						margin: 4,
+						maxSize: new go.Size(100, NaN),
+						wrap: go.TextBlock.WrapFit
+					},
+					new go.Binding("text").makeTwoWay())
+				)
+			);
+
 
 			// define the Node template
 			myDiagram.nodeTemplate = $(
 				go.Node,
 				"Auto",
-				{
-					locationSpot: go.Spot.Top,
-					isShadowed: true,
-					shadowBlur: 1,
-					shadowOffset: new go.Point(0, 1),
-					shadowColor: "rgba(0, 0, 0, .14)",
-				},
-				new go.Binding("location", "loc", go.Point.parse).makeTwoWay(
-					go.Point.stringify
-				),
-				// define the node's outer shape, which will surround the TextBlock
-				$(go.Shape,
-					"Circle", // Cambiar la forma a "Circle"
+					{ locationSpot: go.Spot.Top },
+					$(go.Shape, "Circle",
 					{
-						name: "SHAPE",
-						fill: "#ffffff",
-						strokeWidth: 0,
-						stroke: null,
-						portId: "",
-						fromLinkable: true,
-						fromLinkableSelfNode: true,
-						fromLinkableDuplicates: true,
-						toLinkable: true,
-						toLinkableSelfNode: true,
-						toLinkableDuplicates: true,
-						cursor: "pointer",
-						width: 40, // Definir un ancho y alto para el círculo
-						height: 40,
-					}
+						fill: "white",
+						stroke: "black",
+						strokeWidth: 2,
+						width: 40,
+						height: 40
+					}),
+					new go.Binding("location", "loc", go.Point.parse).makeTwoWay(
+						go.Point.stringify
 					),
-				$(
-					go.TextBlock,
+					$(go.TextBlock,
 					{
 						font: "bold small-caps 11pt helvetica, bold arial, sans-serif",
-						margin: 7,
-						stroke: "rgba(0, 0, 0, .87)",
-						editable: true, // editing the text automatically updates the model data
+						stroke: "black",
+						textAlign: "center",
+						margin: 4,
+						maxSize: new go.Size(80, NaN),
+						wrap: go.TextBlock.WrapFit
 					},
-					new go.Binding("text").makeTwoWay()
+					new go.Binding("text").makeTwoWay())
 				)
-			);
+				
 
 			// unlike the normal selection Adornment, this one includes a Button
 			myDiagram.nodeTemplate.selectionAdornmentTemplate = $(
@@ -136,72 +169,15 @@
 					$(go.Shape, "PlusLine", { width: 6, height: 6 })
 				) // end button
 			); // end Adornment
+			// agrega un nodo de tipo "lugar" al diagrama
+			myDiagram.startTransaction("agregarLugar");
+			myDiagram.model.addNodeData({ category: "lugar", text: "Lugar 1", loc: "0 0" });
+			myDiagram.commitTransaction("agregarLugar");
 
-			myDiagram.nodeTemplateMap.add(
-				"Start",
-				$(
-					go.Node,
-					"Spot",
-					{ desiredSize: new go.Size(75, 75) },
-					new go.Binding(
-						"location",
-						"loc",
-						go.Point.parse
-					).makeTwoWay(go.Point.stringify),
-					$(go.Shape, "Circle", {
-						fill: "#52ce60" /* green */,
-						stroke: null,
-						portId: "",
-						fromLinkable: true,
-						fromLinkableSelfNode: true,
-						fromLinkableDuplicates: true,
-						toLinkable: true,
-						toLinkableSelfNode: true,
-						toLinkableDuplicates: true,
-						cursor: "pointer",
-					}),
-					$(go.TextBlock, "Start", {
-						font: "bold 16pt helvetica, bold arial, sans-serif",
-						stroke: "whitesmoke",
-					})
-				)
-			);
-
-			myDiagram.nodeTemplateMap.add(
-				"End",
-				$(
-					go.Node,
-					"Spot",
-					{ desiredSize: new go.Size(75, 75) },
-					new go.Binding(
-						"location",
-						"loc",
-						go.Point.parse
-					).makeTwoWay(go.Point.stringify),
-					$(go.Shape, "Circle", {
-						fill: "maroon",
-						stroke: null,
-						portId: "",
-						fromLinkable: true,
-						fromLinkableSelfNode: true,
-						fromLinkableDuplicates: true,
-						toLinkable: true,
-						toLinkableSelfNode: true,
-						toLinkableDuplicates: true,
-						cursor: "pointer",
-					}),
-					$(go.Shape, "Circle", {
-						fill: null,
-						desiredSize: new go.Size(65, 65),
-						strokeWidth: 2,
-						stroke: "whitesmoke",
-					}),
-					$(go.TextBlock, "End", {
-						font: "bold 16pt helvetica, bold arial, sans-serif",
-						stroke: "whitesmoke",
-					})
-				)
-			);
+			// Agregar un nodo tipo "transición" al diagrama
+			myDiagram.startTransaction("agregarTransicion");
+			myDiagram.model.addNodeData({ category: "transicion", text: "Transición 1", loc: "0 0" });
+			myDiagram.commitTransaction("agregarTransicion");
 
 			// clicking the button inserts a new node to the right of the selected node,
 			// and adds a link to that new node
@@ -218,7 +194,7 @@
 				var fromNode = adornment.adornedPart;
 				var fromData = fromNode.data;
 				// create a new "State" data object, positioned off to the right of the adorned Node
-				var toData = { text: "p_" };
+				var toData = { text: "p"+count++ };
 				var p = fromNode.location.copy();
 				p.x += 200;
 				// @ts-ignore
@@ -275,33 +251,6 @@
 					new go.Binding("fill", "progress", (progress) =>
 						progress ? "#52ce60" /* green */ : "black"
 					)
-				),
-				$(
-					go.Panel,
-					"Auto",
-					$(
-						go.Shape, // the label background, which becomes transparent around the edges
-						{
-							fill: $(go.Brush, "Radial", {
-								0: "rgb(245, 245, 245)",
-								0.7: "rgb(245, 245, 245)",
-								1: "rgba(245, 245, 245, 0)",
-							}),
-							stroke: null,
-						}
-					),
-					$(
-						go.TextBlock,
-						"transition", // the label text
-						{
-							textAlign: "center",
-							font: "9pt helvetica, arial, sans-serif",
-							margin: 4,
-							editable: true, // enable in-place editing
-						},
-						// editing the text automatically updates the model data
-						new go.Binding("text").makeTwoWay()
-					)
 				)
 			);
 
@@ -326,7 +275,6 @@
 		init();
 	});
 
-	let name = "daniel";
 </script>
 
 <svelte:head>
