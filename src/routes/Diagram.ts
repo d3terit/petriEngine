@@ -98,7 +98,7 @@ export class PetriDiagram {
               this.diagram.commitTransaction();
             }
             go.DraggingTool.prototype.doDeactivate.call(this);  // call the base method
-          };
+        };       
 
         this.myDiagram.linkTemplate = new go.Link(
             {
@@ -114,11 +114,29 @@ export class PetriDiagram {
                 new go.Shape({ strokeWidth: 2, stroke: "#78F5DE" }),
                 new go.Shape({ toArrow: "standard", stroke: null, fill: "#78F5DE" })
             )
+        
+        
+
+  
+        // Define el estilo para el enlace temporal
+        const tempLink = $(
+            go.Link,{
+                layerName: "Tool",
+            },
+            $( go.Shape,
+                {
+                    stroke: "#9853F5",
+                    strokeWidth: 2,
+                }
+            ),
+            $(go.Shape,{ toArrow: "standard", stroke: null, fill: "#78F5DE" })
+        );
+        this.myDiagram.toolManager.linkingTool.temporaryLink = tempLink;
+  
         this.load();
     }
 
     load() {
-        // @ts-ignore
         this.myDiagram.model = go.Model.fromJson({
             class: "go.GraphLinksModel",
             nodeKeyProperty: "id",
