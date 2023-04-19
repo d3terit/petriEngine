@@ -54,7 +54,7 @@ export class PetriDiagram {
                 // have mouse wheel events zoom in and out instead of scroll up and down
                 "toolManager.mouseWheelBehavior": go.ToolManager.WheelZoom,
                 // support double-click in background creating a new node
-                "clickCreatingTool.archetypeNodeData": { text: "p" + getNexNum(), category: CATEGORY_LUGAR },
+                "clickCreatingTool.archetypeNodeData": { text: "p" + getNexNum(), category: CATEGORY_LUGAR, tokens: 0 },
                 // enable undo & redo
                 "undoManager.isEnabled": true,
                 positionComputation: (
@@ -123,12 +123,19 @@ export class PetriDiagram {
             class: "go.GraphLinksModel",
             nodeKeyProperty: "id",
             nodeDataArray: [
-                { id: 0, loc: "90 15", text: "p1", category: 'lugar'},
+                { id: 0, loc: "90 15", text: "p1", category: 'lugar', tokens: 3 },
                 { id: 1, loc: "453 32", text: "p2" , category: 'transicion'},
             ],
             linkDataArray: [
-                { from: 0, to: 1, text: "" },
+                { from: 0, to: 1 },
             ],
         });
+    }
+
+    save() {
+        // @ts-ignore
+        let content = this.myDiagram.model.toJson();
+        console.log(content);
+        this.myDiagram.isModified = false;
     }
 }

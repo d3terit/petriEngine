@@ -6,10 +6,10 @@ const transitionAdornmentTemplate =
     $(go.Adornment, "Spot",
         $(go.Panel, "Auto",
             $(go.Shape, "Rectangle", {
-                fill: "#6CC4F515",
-                stroke: "#6CC4F5",
+                fill: "#317CA840",
+                stroke: "#317CA8",
                 strokeWidth: 2,
-                width: 30,
+                width: 15,
                 height: 70
             }),
             $(go.Placeholder)
@@ -17,27 +17,27 @@ const transitionAdornmentTemplate =
         $(go.Panel, "Horizontal",
             { alignment: go.Spot.Top, alignmentFocus: go.Spot.Bottom },
             $("Button",
-                { click: editText }, 
-                $(go.TextBlock, "\u270E",
-                { 
-                    font: "bold 10pt sans-serif", 
-                    desiredSize: new go.Size(15, 15), 
-                    textAlign: "center",
-                    stroke: "#F5895F"
-                })
+                { click: editText },
+                $(go.TextBlock, "\u270D",
+                    {
+                        font: "bold 10pt sans-serif",
+                        desiredSize: new go.Size(15, 15),
+                        textAlign: "center",
+                        stroke: "#F5895F"
+                    })
             ),
             $("Button",
                 {
-                    click: drawLink, 
-                    actionMove: drawLink 
+                    click: drawLink,
+                    actionMove: drawLink
                 },
                 $(go.Shape,
                     { geometryString: "M0 0 L8 0 8 12 14 12 M12 10 L14 12 12 14" })
             ),
             $("Button",
                 {
-                    actionMove: dragNewNode, 
-                    click: clickNewNode 
+                    actionMove: dragNewNode,
+                    click: clickNewNode
                 },
                 $(go.Shape,
                     { geometryString: "M0 0 L3 0 3 10 6 10 x F1 M6 6 A5 5 0 1 1 5 10 A5 5 0 1 1 15 10", fill: "transparent" })
@@ -69,13 +69,15 @@ function dragNewNode(e: any, button: any) {
         tool.doActivate();
     }
 }
+
 function createNodeAndLink(fromnode: any) {
     var diagram = fromnode.diagram;
     var model = diagram.model;
     var nodedata = model.copyNodeData(
         {
             text: "p",
-            category: "lugar"
+            category: "lugar",
+            tokens: 0,
         }
     );
     model.addNodeData(nodedata);
@@ -96,32 +98,37 @@ function clickNewNode(e: any, button: any) {
     e.diagram.commitTransaction("CreateNL");
 }
 
-
-export const transitionTemplate = go.GraphObject.make(go.Node, "Auto",
+export const transitionTemplate = go.GraphObject.make(go.Node, "Spot",
     { locationSpot: go.Spot.Top },
-    $(go.Shape, "Rectangle",{
-            portId: "",
-            fill: "#111",
-            stroke: "#F5895F",
-            strokeWidth: 2,
-            width: 30,
-            height: 70,
-            fromLinkable: true, fromLinkableSelfNode: true, fromLinkableDuplicates: true,
-            toLinkable: true, toLinkableSelfNode: true, toLinkableDuplicates: true,
-        }),
+    $(go.Shape, "Rectangle", {
+        portId: "",
+        fill: "#F5895F",
+        stroke: null,
+        width: 15,
+        height: 70,
+        fromLinkable: true, fromLinkableSelfNode: true, fromLinkableDuplicates: true,
+        toLinkable: true, toLinkableSelfNode: true, toLinkableDuplicates: true,
+    }),
     new go.Binding("location", "loc", go.Point.parse).makeTwoWay(
         go.Point.stringify
     ),
-    $(go.TextBlock,
+    $(go.Panel, "Vertical",
         {
-            font: "bold small-caps 11pt helvetica, bold arial, sans-serif",
-            stroke: "#F5895F",
-            textAlign: "center",
-            margin: 4,
-            maxSize: new go.Size(80, NaN),
-            wrap: go.TextBlock.WrapFit,
-            editable: true
+            width: 70,
+            height: 80,
         },
-        new go.Binding("text").makeTwoWay()),
-    {selectionAdornmentTemplate: transitionAdornmentTemplate}
+        $(go.TextBlock,
+            {
+                font: "bold small-caps 11pt helvetica, bold arial, sans-serif",
+                stroke: "#F5895F",
+                textAlign: "center",
+                margin: 4,
+                maxSize: new go.Size(80, NaN),
+                wrap: go.TextBlock.WrapFit,
+                alignment: go.Spot.Left,
+                editable: true
+            },
+            new go.Binding("text").makeTwoWay()),
+    ),
+    { selectionAdornmentTemplate: transitionAdornmentTemplate }
 )

@@ -1,4 +1,5 @@
 import * as go from "gojs";
+import { markTemplate } from "./mark";
 
 const $ = go.GraphObject.make;
 
@@ -17,27 +18,37 @@ const placeAdornmentTemplate =
         $(go.Panel, "Horizontal",
             { alignment: go.Spot.Top, alignmentFocus: go.Spot.Bottom },
             $("Button",
-                { click: editText }, 
+                { click: editName },
+                $(go.TextBlock, "\u270D",
+                    {
+                        font: "bold 10pt sans-serif",
+                        desiredSize: new go.Size(15, 15),
+                        textAlign: "center",
+                        stroke: "#F5BB6D"
+                    })
+            ),
+            $("Button",
+                { click: editMark },
                 $(go.TextBlock, "\u270E",
-                { 
-                    font: "bold 10pt sans-serif", 
-                    desiredSize: new go.Size(15, 15), 
-                    textAlign: "center",
-                    stroke: "#F5BB6D"
-                })
+                    {
+                        font: "bold 10pt sans-serif",
+                        desiredSize: new go.Size(15, 15),
+                        textAlign: "center",
+                        stroke: "#F5BB6D"
+                    })
             ),
             $("Button",
                 {
-                    click: drawLink, 
-                    actionMove: drawLink 
+                    click: drawLink,
+                    actionMove: drawLink
                 },
                 $(go.Shape,
                     { geometryString: "M0 0 L8 0 8 12 14 12 M12 10 L14 12 12 14" })
             ),
             $("Button",
                 {
-                    actionMove: dragNewNode, 
-                    click: clickNewNode 
+                    actionMove: dragNewNode,
+                    click: clickNewNode
                 },
                 $(go.Shape,
                     { geometryString: "M0 0 L3 0 3 10 6 10 x F1 M6 6 L14 6 14 14 6 14z", fill: "transparent" })
@@ -45,9 +56,14 @@ const placeAdornmentTemplate =
         )
     );
 
-function editText(e: any, button: any) {
+function editName(e: any, button: any) {
     var node = button.part.adornedPart;
-    e.diagram.commandHandler.editTextBlock(node.findObject("TEXTBLOCK"));
+    e.diagram.commandHandler.editTextBlock(node.findObject("NAME"));
+}
+
+function editMark(e: any, button: any) {
+    var node = button.part.adornedPart;
+    e.diagram.commandHandler.editTextBlock(node.findObject("MARKTEXT"));
 }
 
 function drawLink(e: any, button: any) {
@@ -97,7 +113,7 @@ function clickNewNode(e: any, button: any) {
 }
 
 
-export const placeTemplate = go.GraphObject.make(go.Node, "Auto",
+export const placeTemplate = go.GraphObject.make(go.Node, "Spot",
     { locationSpot: go.Spot.Top },
     $(go.Shape, "Circle",
         {
@@ -110,19 +126,28 @@ export const placeTemplate = go.GraphObject.make(go.Node, "Auto",
             fromLinkable: true, fromLinkableSelfNode: true, fromLinkableDuplicates: true,
             toLinkable: true, toLinkableSelfNode: true, toLinkableDuplicates: true,
         }),
+    markTemplate,
     new go.Binding("location", "loc", go.Point.parse).makeTwoWay(
         go.Point.stringify
     ),
-    $(go.TextBlock,
+    $(go.Panel, "Vertical",
         {
-            font: "bold small-caps 11pt helvetica, bold arial, sans-serif",
-            stroke: "#F5BB6D",
-            textAlign: "center",
-            margin: 4,
-            maxSize: new go.Size(80, NaN),
-            wrap: go.TextBlock.WrapFit,
-            editable: true,
+            width: 100,
+            height: 70,
         },
-        new go.Binding("text").makeTwoWay()),
-    { selectionAdornmentTemplate: placeAdornmentTemplate }
-)
+        $(go.TextBlock,
+            {
+                name: "NAME",
+                font: "bold small-caps 11pt helvetica, bold arial, sans-serif",
+                stroke: "#F5BB6D",
+                textAlign: "center",
+                margin: 4,
+                maxSize: new go.Size(80, NaN),
+                wrap: go.TextBlock.WrapFit,
+                alignment: go.Spot.Left,
+                editable: true,
+            },
+            new go.Binding("text").makeTwoWay()),
+    ),
+    { selectionAdornmentTemplate: placeAdornmentTemplate },
+);
