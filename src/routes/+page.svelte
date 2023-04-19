@@ -1,4 +1,5 @@
 <script>
+	import Header from "./Header.svelte";
 	import { onMount } from "svelte";
 	import { PetriDiagram } from "./Diagram";
 	// @ts-ignore
@@ -20,10 +21,6 @@
 	<meta name="description" content="Svelte demo app" />
 </svelte:head>
 
-<button
-	class="absolute w-6 h-6 top-0 left-0 m-4 z-10"
-	on:click={() => exportDiagram()}
->
-	sasas
-</button>
-<div id="contextDiagram" class="w-screen h-screen" />
+<Header {diagram} />
+
+<div id="contextDiagram" class="w-screen h-[calc(100vh-40px)] absolute top-10" />

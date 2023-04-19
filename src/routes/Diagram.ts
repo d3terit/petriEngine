@@ -115,9 +115,6 @@ export class PetriDiagram {
                 new go.Shape({ toArrow: "standard", stroke: null, fill: "#78F5DE" })
             )
         
-        
-
-  
         // Define el estilo para el enlace temporal
         const tempLink = $(
             go.Link,{
