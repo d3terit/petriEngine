@@ -3,8 +3,7 @@
 	import "../app.css";
 </script>
 
-<div class="app">
-
+<div class="app bg-[#111] w-screen h-screen">
 	<main>
 		<slot />
 	</main>

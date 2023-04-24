@@ -4,6 +4,7 @@ import { Rules } from "./decorators/rules";
 import { Styles } from "./decorators/styles";
 import { placeTemplate } from "./types/place";
 import { transitionTemplate } from "./types/transition";
+import { Events } from "./events/events";
 export class PetriDiagram {
     myDiagram: go.Diagram;
     context = ""
@@ -73,6 +74,7 @@ export class PetriDiagram {
 
         new Rules(this.myDiagram).init();
         new Styles(this.myDiagram).init();
+        new Events(this.myDiagram).init();
         
         this.myDiagram.nodeTemplateMap.add(CATEGORY_LUGAR, placeTemplate);
         this.myDiagram.nodeTemplateMap.add(CATEGORY_TRANSICION, transitionTemplate);
@@ -139,18 +141,42 @@ export class PetriDiagram {
             nodeKeyProperty: "id",
             nodeDataArray: [
                 { id: 0, loc: "90 15", text: "p1", category: 'lugar', tokens: 3 },
-                { id: 1, loc: "453 32", text: "p2" , category: 'transicion'},
+                { id: 1, loc: "453 32", text: "t1" , category: 'transicion'},
+                { id: 2, loc: "200 200", text: "p2", category: 'lugar', tokens: 0 },
+                { id: 3, loc: "521 200", text: "t2", category: 'transicion' },
+
             ],
             linkDataArray: [
                 { from: 0, to: 1 },
+                { from: 1, to: 2 },
+                { from: 2, to: 3 },
             ],
         });
     }
 
     save() {
-        // @ts-ignore
         let content = this.myDiagram.model.toJson();
-        console.log(content);
+        var blob = new Blob([content], { type: "application/json" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "datos.json";
+        link.click();
+        URL.revokeObjectURL(link.href);
         this.myDiagram.isModified = false;
+    }
+
+    open(){
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = (e:any) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.readAsText(file, "UTF-8");
+            reader.onload = (e:any) => {
+                this.myDiagram.model = go.Model.fromJson(e.target.result);
+            }
+        }
+        input.click();
     }
 }
