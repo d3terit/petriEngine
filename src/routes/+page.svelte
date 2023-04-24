@@ -11,9 +11,6 @@
 		diagram = new PetriDiagram("contextDiagram");
 		diagram.init();
 	});
-	const exportDiagram = () => {
-		if (diagram) diagram.save();
-	};
 </script>
 
 <svelte:head>

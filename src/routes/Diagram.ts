@@ -4,11 +4,12 @@ import { Rules } from "./decorators/rules";
 import { Styles } from "./decorators/styles";
 import { placeTemplate } from "./types/place";
 import { transitionTemplate } from "./types/transition";
-import { Events } from "./events/events";
+import { Events, getDiagram } from "./events/events";
 export class PetriDiagram {
     myDiagram: go.Diagram;
     context = ""
     themes: any = null
+    events!: Events;
 
     constructor(context: string) {
         this.context = context;
@@ -74,7 +75,8 @@ export class PetriDiagram {
 
         new Rules(this.myDiagram).init();
         new Styles(this.myDiagram).init();
-        new Events(this.myDiagram).init();
+        this.events = new Events(this.myDiagram);
+        this.events.init();            
         
         this.myDiagram.nodeTemplateMap.add(CATEGORY_LUGAR, placeTemplate);
         this.myDiagram.nodeTemplateMap.add(CATEGORY_TRANSICION, transitionTemplate);
@@ -178,5 +180,22 @@ export class PetriDiagram {
             }
         }
         input.click();
+    }
+
+    simulate(stopFunction: any) {
+        fetch("http://127.0.0.1:8000/simulate/", {
+            method: "post",
+            body: getDiagram(this.myDiagram)
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (JSON.stringify(data) !== getDiagram(this.myDiagram)) {
+                this.myDiagram.animationManager.isEnabled = false;
+                this.myDiagram.model = go.Model.fromJson(data);
+                this.myDiagram.animationManager.isEnabled = true;
+            } else if (stopFunction) {
+                stopFunction();
+            }
+        })
     }
 }

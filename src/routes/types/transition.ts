@@ -1,4 +1,5 @@
 import * as go from "gojs";
+import { getDiagram } from "../events/events";
 
 const $ = go.GraphObject.make;
 
@@ -16,6 +17,20 @@ const transitionAdornmentTemplate =
         ),
         $(go.Panel, "Horizontal",
             { alignment: go.Spot.Top, alignmentFocus: go.Spot.Bottom },
+            $("Button",
+                {
+                    name: "fireButton",
+                    click: fireTransition
+                },
+                //icono de disparo
+                $(go.TextBlock, "\u25B6",
+                    {
+                        font: "bold 10pt sans-serif",
+                        desiredSize: new go.Size(15, 15),
+                        textAlign: "center",
+                        stroke: "#0f0"
+                    })
+            ),
             $("Button",
                 { click: editText },
                 $(go.TextBlock, "\u270D",
@@ -44,6 +59,25 @@ const transitionAdornmentTemplate =
             )
         )
     );
+
+function fireTransition(e: any, button: any) {
+    var node = button.part.adornedPart;
+    var id = node.key;
+    var diagram = node.diagram;
+    diagram.animationManager.isEnabled = false;
+    fetch("http://127.0.0.1:8000/fire_transition/" + id, {
+        method: "post",
+        body: getDiagram(diagram)
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            diagram.model = go.Model.fromJson(data);
+            diagram.animationManager.isEnabled = true;
+        })
+        .catch((error) => {
+            diagram.animationManager.isEnabled = true;
+        })
+}
 
 function editText(e: any, button: any) {
     var node = button.part.adornedPart;
@@ -101,6 +135,7 @@ function clickNewNode(e: any, button: any) {
 export const transitionTemplate = go.GraphObject.make(go.Node, "Spot",
     { locationSpot: go.Spot.Top },
     $(go.Shape, "Rectangle", {
+        name: "block",
         portId: "",
         fill: "#F5895F",
         stroke: null,
